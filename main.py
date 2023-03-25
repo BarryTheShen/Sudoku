@@ -1,6 +1,7 @@
 import random
 import tkinter as tk
 from tkinter import ttk
+import time
 random_list = [1, 2, 3, 4, 5, 6, 7, 8, 9]
 
 
@@ -92,58 +93,83 @@ def generate_sudoku_grid(seed=seed_generator()):
 
 def display_sudoku(sudoku_grid, difficulty):
     # Display the sudoku grid
+    global root
     root = tk.Tk()
     root.title("Sudoku")
-    root.geometry("500x360")
+    root.geometry("360x360")
     root.resizable(0, 0)
     missing = []
     for i in range(9):
         for j in range(9):
-            frame = tk.Frame(root, width=2, height=1, bd=1, relief='flat', bg='black')
-            frame.grid(row=i, column=j)
+            #frame = tk.Frame(root, width=2, height=1, bd=1, relief='flat', bg='black')
+            #frame.grid(row=i, column=j)
             style = ttk.Style()
-            style.configure("Black.TSeparator", bg="black", bd=20, relief='flat', width=2, height=2)
+            style.configure("Black.TSeparator", bg="black", bd=2, relief='flat', width=2, height=1)
             if j == 0 or j == 3 or j == 6:
                 ttk.Separator(root, orient='vertical', style='Black.TSeparator').grid(sticky='w', row=i, column=j, ipady=19)
             if i == 0 or i == 3 or i == 6:
                 ttk.Separator(root, orient='horizontal', style='Black.TSeparator').grid(sticky='n', row=i, column=j, ipadx=19)
             tf = random.choices((True, False), weights=[difficulty, 1-difficulty], k=1)
             if tf[0]:
-                label = tk.Label(root, text=sudoku_grid[i][j], width=2, height=1, font=("Arial", 20), bg='green')
+                label = tk.Label(root, text=sudoku_grid[i][j], width=2, height=1, font=("Arial", 20), bg='#30ff00')
                 label.grid(row=i, column=j)
             else:
-                missing.append([i, j])
                 entry = tk.Entry(root, width=2, font=("Arial", 20), bg='white', relief='flat')
                 entry.grid(row=i, column=j)
-    button = tk.Button(root, text="Check", width=10, height=1, font=("Arial", 20), bg='white', relief='flat', command=grid_check)
-    button.grid(row=9, column=0, columnspan=9)
+                missing.append([[i, j], entry])
     root.update()
     return missing
 
 
-def grid_check():
-    # Check the grid
-    pass
-
-
 def player_operation(missing, grid):
     # Player operation
-    pass
+    for i in missing:
+        if len(i[1].get()) > 1:
+            i[1].delete(1, tk.END)
+        elif len(i[1].get()) == 1:
+            if i[1].get() == str(grid[i[0][0]][i[0][1]]):
+                i[1].destroy()
+                label = tk.Label(root, text=grid[i[0][0]][i[0][1]], width=2, height=1, font=("Arial", 20), bg='#30ff00')
+                label.grid(row=i[0][0], column=i[0][1])
+                missing.remove(i)
+            else:
+                i[1].configure(bg='#fff900')
+    root.update()
 
 
+def is_game_end(missing):
+    # Check if the game is end
+    if len(missing) == 0:
+        return True
+    else:
+        return False
 
 def ending():
     # Game end
-    pass
+    root.destroy()
+    end_screen = tk.Tk()
+    end_screen.title("Game End")
+    end_screen.geometry("200x100")
+    end_screen.resizable(0, 0)
+    label = tk.Label(end_screen, text="You win", font=("Arial", 20))
+    label.pack()
+    new_game = tk.Button(end_screen, text="New Game", command=lambda: [end_screen.destroy(), main()])
+    new_game.pack()
+    quit = tk.Button(end_screen, text="Quit", command=end_screen.destroy)
+    quit.pack()
+    end_screen.mainloop()
 
 
 def main():
     seed = seed_generator()
+    #seed = '12345678911111111111'
     grid = generate_sudoku_grid(seed)
     missing = display_sudoku(generate_sudoku_grid(seed), 0.5)
     game_end = False
     while not game_end:
         player_operation(missing, grid)
+        game_end = is_game_end(missing)
+
     ending()
 
 
