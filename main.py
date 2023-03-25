@@ -1,7 +1,6 @@
 import random
 import tkinter as tk
 from tkinter import ttk
-import time
 random_list = [1, 2, 3, 4, 5, 6, 7, 8, 9]
 
 
@@ -144,7 +143,7 @@ def is_game_end(missing):
     else:
         return False
 
-def ending():
+def ending(seed):
     # Game end
     root.destroy()
     end_screen = tk.Tk()
@@ -153,6 +152,8 @@ def ending():
     end_screen.resizable(0, 0)
     label = tk.Label(end_screen, text="You win", font=("Arial", 20))
     label.pack()
+    seed_label = tk.Label(end_screen, text="Seed: " + seed, font=("Arial", 10))
+    seed_label.pack()
     new_game = tk.Button(end_screen, text="New Game", command=lambda: [end_screen.destroy(), main()])
     new_game.pack()
     quit = tk.Button(end_screen, text="Quit", command=end_screen.destroy)
@@ -170,7 +171,7 @@ def main():
         player_operation(missing, grid)
         game_end = is_game_end(missing)
 
-    ending()
+    ending(seed)
 
 
 if __name__ == '__main__':
